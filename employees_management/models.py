@@ -2,6 +2,7 @@
 from django.db import models
 from django.utils.dateformat import DateFormat
 from django.utils.translation import ugettext_lazy as _
+from django.utils.encoding import python_2_unicode_compatible
 
 
 class Employee(models.Model):
@@ -32,11 +33,12 @@ class Employee(models.Model):
     working_task = models.TextField(_(u'Working Task'), max_length=200)
     comment = models.TextField(_(u'Comment'), max_length=100)
 
+    @python_2_unicode_compatible
     def __str__(self):
-        return "{0} {1}".format(self.first_name, self.last_name)
+        return u'%s %s' % (self.first_name, self.last_name)
 
     def long_str(self):
-        return "{0} {1}".format(self.first_name,
+        return u'%s %s %s %s %s %s %s %s %s %s %s' % (self.first_name,
                                 self.last_name,
                                 self.street,
                                 self.mobile_number,
@@ -67,5 +69,6 @@ class Row(models.Model):
     date_to = models.DateTimeField(_(u'Date to'))
     absence_reason = models.CharField(_(u'Absence Reason'), max_length=200)
 
+    @python_2_unicode_compatible
     def __str__(self):
-        return "{0} {1} {2} {3} {4}".format(self.emp_abs, self.emp_rep, DateFormat(self.date_from).format('j/m/Y H:i:s'), DateFormat(self.date_to).format('j/m/Y H:i:s'), self.absence_reason)
+        return u'%s %s %s %s %s' % (self.emp_abs, self.emp_rep, DateFormat(self.date_from).format('j/m/Y H:i:s'), DateFormat(self.date_to).format('j/m/Y H:i:s'), self.absence_reason)
