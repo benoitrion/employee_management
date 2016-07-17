@@ -2,7 +2,6 @@
 from django.db import models
 from django.utils.dateformat import DateFormat
 from django.utils.translation import ugettext_lazy as _
-from django.utils.encoding import python_2_unicode_compatible
 
 
 class Employee(models.Model):
@@ -30,11 +29,11 @@ class Employee(models.Model):
         ('UND', _(u'Undefined')),
     )
     working_schedule = models.CharField(_(u'Working Schedule'), max_length=6, choices=WORKING_SCHEDULE, default='UND')
-    working_task = models.TextField(_(u'Working Task'), max_length=200)
-    comment = models.TextField(_(u'Comment'), max_length=100)
+    #TODO find a solution for TextField length
+    working_task = models.TextField(_(u'Working Task'))
+    comment = models.TextField(_(u'Comment'))
 
-    @python_2_unicode_compatible
-    def __str__(self):
+    def __unicode__(self):
         return u'%s %s' % (self.first_name, self.last_name)
 
     def long_str(self):
@@ -45,30 +44,39 @@ class Employee(models.Model):
                                 self.phone_number,
                                 self.mail,
                                 self.working_place,
-                                self.working_contract,
-                                self.working_schedule,
+                                self.get_working_contract_display(),
+                                self.get_working_schedule_display(),
                                 self.working_task,
-                                self.working_comment, )
+                                self.comment, )
+    #TODO an employee need to be unique
+
 
 class Row(models.Model):
     emp_abs = models.ForeignKey(
-        _(u'Absent Employee'),
         Employee,
         on_delete=models.CASCADE,
-        verbose_name="absent employee",
+        verbose_name=_(u'Absent Employee'),
         related_name="emp_abs",
     )
     emp_rep = models.ForeignKey(
-        _(u'Replacement Employee'),
         Employee,
         on_delete=models.CASCADE,
-        verbose_name="replacement employee",
+        verbose_name=_(u'Replacement Employee'),
         related_name="emp_rep",
     )
     date_from = models.DateTimeField(_(u'Date from'))
     date_to = models.DateTimeField(_(u'Date to'))
     absence_reason = models.CharField(_(u'Absence Reason'), max_length=200)
 
-    @python_2_unicode_compatible
-    def __str__(self):
+    #TODO overwrite save method
+    """"
+    Need to check :
+    - Row is invalid
+    - Emp abs is already absent at this interval
+    - Emp abs is already replacement at this interval
+    - Emp rep is already absent at this interval
+    - Emp rep is already replacement at this interval
+    - Row already exists
+    """""
+    def __unicode__(self):
         return u'%s %s %s %s %s' % (self.emp_abs, self.emp_rep, DateFormat(self.date_from).format('j/m/Y H:i:s'), DateFormat(self.date_to).format('j/m/Y H:i:s'), self.absence_reason)
